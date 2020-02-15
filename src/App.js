@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import './App.css';
 
 class App extends React.Component {
-  
-  constructor(props){
+
+  constructor(props) {
     super(props);
     this.state = {
       title: 'SPRING LIBRARY',
@@ -24,7 +24,7 @@ class App extends React.Component {
             books: result
           });
           console.log(result);
-          
+
         },
         // Note: it's important to handle errors here
         // instead of a catch() block so that we don't swallow
@@ -39,14 +39,15 @@ class App extends React.Component {
   }
 
 
-  fSubmit = (e) =>{
+  fSubmit = (e) => {
+
     e.preventDefault();
     console.log('try');
 
     let datas = this.state.books;
     let bookTitle = this.refs.bookTitle.value;
     let authors = []
-    let author =new Object()
+    let author = new Object()
     author.firstName = this.refs.authorName.value;
     author.lastName = this.refs.authorLastName.value;
     authors.push(author)
@@ -58,12 +59,17 @@ class App extends React.Component {
         bookTitle,
         authors
       }
-  
-      datas.push(data); 
+
+      datas.push(data);
     } else {                    //update
       let index = this.state.index;
       datas[index].bookTitle = bookTitle;
       datas[index].authors = authors
+      var request = new XMLHttpRequest();
+      request.open('PUT', 'http://localhost:8090/api/books/'+(index+1));
+      request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+      request.send(JSON.stringify(datas[index]));
+      console.log(datas[index])
     }
 
     this.setState({
@@ -76,10 +82,15 @@ class App extends React.Component {
   }
 
   fRemove = (i) => {
-    let datas  = this.state.books;
-    datas.splice(i,1);
+    var request = new XMLHttpRequest();
+    request.open('DELETE', 'http://localhost:8090/api/books/'+i);
+    request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+    request.send();
+
+    let datas = this.state.books;
+    datas.splice(i, 1);
     this.setState({
-      datas:datas
+      datas: datas
     });
 
     this.refs.myForm.reset();
@@ -93,9 +104,10 @@ class App extends React.Component {
     this.refs.authorName.value = book.authors[0].firstName;
     this.refs.authorLastName.value = book.authors[0].lastName;
 
+
     this.setState({
       act: 1,
-      index: i 
+      index: i
     })
 
   }
@@ -110,14 +122,14 @@ class App extends React.Component {
           <input type="text" ref="bookTitle" placeholder="Book title" className="formField" />
           <input type="text" ref="authorName" placeholder="Author first name" className="formField" />
           <input type="text" ref="authorLastName" placeholder="Author last name" className="formField" />
-          <button onClick={(e)=>this.fSubmit(e)} className="myButton">Submit</button>
+          <button onClick={(e) => this.fSubmit(e)} className="myButton">Submit</button>
         </form>
         <pre>
           {books.map((book, i) =>
             <li key={i} className="myList">
-              {i+1}.{book.bookTitle}, {book.authors.map(author=>author.firstName + " " + author.lastName).join(",")}
-              <button onClick={()=>this.fRemove(i)} className="myListButton" disabled={this.state.isButtonsDisabled}>Remove</button>
-              <button onClick={()=>this.fEdit(i)} className="myListButton" disabled={this.state.isButtonsDisabled}>Edit</button>
+              {i + 1}.{book.bookTitle}, {book.authors.map(author => author.firstName + " " + author.lastName).join(",")}
+              <button onClick={() => this.fRemove(i)} className="myListButton" disabled={this.state.isButtonsDisabled}>Remove</button>
+              <button onClick={() => this.fEdit(i)} className="myListButton" disabled={this.state.isButtonsDisabled}>Edit</button>
             </li>
           )}
         </pre>
