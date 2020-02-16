@@ -19,6 +19,7 @@ class App extends React.Component {
       .then(res => res.json())
       .then(
         (result) => {
+          console.log(result);
           this.setState({
             isLoaded: true,
             books: result
@@ -46,27 +47,30 @@ class App extends React.Component {
 
     let datas = this.state.books;
     let bookTitle = this.refs.bookTitle.value;
-    let authors = []
-    let author = new Object()
-    author.firstName = this.refs.authorName.value;
-    author.lastName = this.refs.authorLastName.value;
-    authors.push(author)
+    //let authors = []
+    //let author = new Object()
+    //author.firstName = this.refs.authorName.value;
+    //author.lastName = this.refs.authorLastName.value;
+    //authors.push(author)
 
 
 
     if (this.state.act === 0) { //new
       let data = {
         bookTitle,
-        authors
+        //authors
       }
-
       datas.push(data);
+      var request = new XMLHttpRequest();
+      request.open('POST', 'http://localhost:8090/api/books/');
+      request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+      request.send(JSON.stringify(data));
     } else {                    //update
       let index = this.state.index;
       datas[index].bookTitle = bookTitle;
-      datas[index].authors = authors
+      //////datas[index].authors = authors
       var request = new XMLHttpRequest();
-      request.open('PUT', 'http://localhost:8090/api/books/'+(index+1));
+      request.open('PUT', 'http://localhost:8090/api/books/'+(datas[index].id));
       request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
       request.send(JSON.stringify(datas[index]));
       console.log(datas[index])
@@ -82,12 +86,12 @@ class App extends React.Component {
   }
 
   fRemove = (i) => {
-    var request = new XMLHttpRequest();
-    request.open('DELETE', 'http://localhost:8090/api/books/'+i);
-    request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-    request.send();
 
     let datas = this.state.books;
+    var request = new XMLHttpRequest();
+    request.open('DELETE', 'http://localhost:8090/api/books/'+datas[i].id);
+    request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+    request.send();
     datas.splice(i, 1);
     this.setState({
       datas: datas
@@ -98,14 +102,14 @@ class App extends React.Component {
   }
 
   fEdit = (i) => {
-    this.state.isButtonsDisabled = true;
     let book = this.state.books[i];
     this.refs.bookTitle.value = book.bookTitle;
-    this.refs.authorName.value = book.authors[0].firstName;
-    this.refs.authorLastName.value = book.authors[0].lastName;
+    //this.refs.authorName.value = book.authors[0].firstName;
+    //this.refs.authorLastName.value = book.authors[0].lastName;
 
 
     this.setState({
+      isButtonsDisabled: true,
       act: 1,
       index: i
     })
@@ -120,14 +124,14 @@ class App extends React.Component {
         <h2>{this.state.title}</h2>
         <form ref="myForm" className="myForm">
           <input type="text" ref="bookTitle" placeholder="Book title" className="formField" />
-          <input type="text" ref="authorName" placeholder="Author first name" className="formField" />
-          <input type="text" ref="authorLastName" placeholder="Author last name" className="formField" />
+          {/*<input type="text" ref="authorName" placeholder="Author first name" className="formField" />*/}
+          {/*<input type="text" ref="authorLastName" placeholder="Author last name" className="formField" />*/}
           <button onClick={(e) => this.fSubmit(e)} className="myButton">Submit</button>
         </form>
         <pre>
           {books.map((book, i) =>
             <li key={i} className="myList">
-              {i + 1}.{book.bookTitle}, {book.authors.map(author => author.firstName + " " + author.lastName).join(",")}
+              {book.id}.{book.bookTitle}{/*, {book.authors.map(author => author.firstName + " " + author.lastName).join(",")}*/}
               <button onClick={() => this.fRemove(i)} className="myListButton" disabled={this.state.isButtonsDisabled}>Remove</button>
               <button onClick={() => this.fEdit(i)} className="myListButton" disabled={this.state.isButtonsDisabled}>Edit</button>
             </li>
